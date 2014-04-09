@@ -1,16 +1,22 @@
 # Path to oh-my-zsh configuration
 ZSH=$HOME/.oh-my-zsh
 
+source $ZSH/oh-my-zsh.sh
+
 # Turn off oh-my-zsh update prompt
 DISABLE_UPDATE_PROMPT=true
 
 # Turn off autocorrect
 DISABLE_CORRECTION=true
 
+#<<< Plugins
+plugins=(git history-substring-search safe-paste)
+#>>>
+
+VIRTUAL_ENV_DISABLE_PROMPT=yes
+
 # Set name of the theme to load. Look in ~/.oh-my-zsh/themes/
 ZSH_THEME="af-magic"
-
-source $ZSH/oh-my-zsh.sh
 
 #<<< Options
 setopt AUTO_CD
@@ -18,18 +24,25 @@ setopt NO_BEEP
 #>>>
 
 #<<< Aliases
-alias zshconfig="emacs ~/.zshrc"
-alias ohmyzsh="emacs ~/.oh-my-zsh"
+alias zshconfig="emacs ~/.zshrc --nw"
+alias ohmyzsh="emacs ~/.oh-my-zsh --nw"
+alias emacsconfig="emacs ~/.emacs --nw"
 #cmdline helpers
 alias df="df -H"
 alias ls="ls --color"
-alias ll="ls -lsai --color"
-alias ...="cd ../../../"
-alias ....="cd ../../../../"
+alias l="ls -l"
+alias ll="ls -lsai"
+alias ...="cd ../../.."
+alias ....="cd ../../../.."
 #apt-get stuff
 alias update="sudo apt-get update"
 alias upgrade="sudo apt-get upgrade"
 alias install="sudo apt-get install"
+#git stuff
+alias gits="git status"
+alias gitl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitc="git commit"
+alias gitcl="git log $1...$2 --pretty=format:\"  * %s <%an>\""
 #networking helpers
 alias cpv="rsync -pogh --progress"
 alias rnet="sudo restart networking"
@@ -61,20 +74,27 @@ setopt HIST_REDUCE_BLANKS
 setopt EXTENDED_HISTORY
 #>>>
 
-#<<< Plugins
-plugins=(git history-substring-search safe-paste)
-#>>>
-
 #<<< PATH
 export PATH=/usr/local/sbin:/usr/local/bin:/opt/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 #>>>
 
 #<<< PROMPT
-local smiley="%(?,%{$fg[green]%}:)%{$reset_color%},%{$fg[red]%}:(%{$reset_color%})"
-PROMPT='%B%t%b $FG[032]%0~ %{$reset_color%}${smiley} '
+source ~/.zsh/git-prompt/zshrc.sh
+venv_info() { [ $VIRTUAL_ENV ] && echo $(basename $VIRTUAL_ENV) }
+precmd() { print "" }
+local smiley="%(?,%{$fg[green]%}:)%{$reset_color%},%{$fg[red]%}:/%{$reset_color%})"
+PROMPT='%B%t%b $FG[032]%0~%{$reset_color%} ${smiley} '
+RPROMPT='(%{$fg[yellow]%}$(venv_info)%{$reset_color%})$(git_super_status)'
 #>>>
 
 #<<< Startup
-export TERM=xterm-256color
-fortune | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n1)
+fortune -s | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n1) | lolcat
+#>>>
+
+export TERM='xterm-256color'
+
+#<<< venvwrapper / autoenv
+export WORKON_HOME=~/workspace/Envs
+source /usr/local/bin/virtualenvwrapper.sh
+source ~/.autoenv/activate.sh
 #>>>
